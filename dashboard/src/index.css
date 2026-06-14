@@ -1,0 +1,99 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg: #000000;
+  --panel: #0a0a0a;
+  --panel-hover: #111111;
+  --surface: #111111;
+  --border: #1a1a1a;
+  --border-bright: #2a2a2a;
+  --orange: #ff6c00;
+  --orange-dim: #cc5500;
+  --amber: #f0a500;
+  --green: #00d46a;
+  --green-dim: #00a854;
+  --red: #ff3b3b;
+  --red-dim: #cc2020;
+  --text-primary: #c8cdd8;
+  --text-secondary: #5a6478;
+  --text-dim: #3a4155;
+  --cyan: #00c8e0;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  background-color: var(--bg);
+  color: var(--text-primary);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
+  line-height: 1.4;
+  -webkit-font-smoothing: antialiased;
+}
+
+.font-condensed {
+  font-family: 'IBM Plex Sans Condensed', sans-serif;
+}
+
+.bb-panel {
+  background: var(--panel);
+  border: 1px solid var(--border);
+}
+
+.bb-panel-header {
+  background: var(--orange);
+  color: #000;
+  font-family: 'IBM Plex Sans Condensed', sans-serif;
+  font-weight: 700;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 3px 8px;
+}
+
+.bb-panel-header-dark {
+  background: var(--border-bright);
+  color: var(--text-secondary);
+  font-family: 'IBM Plex Sans Condensed', sans-serif;
+  font-weight: 600;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 3px 8px;
+}
+
+.bb-num {
+  font-family: 'IBM Plex Mono', monospace;
+  font-variant-numeric: tabular-nums;
+}
+
+.bb-pos { color: var(--green); }
+.bb-neg { color: var(--red); }
+.bb-neu { color: var(--text-primary); }
+.bb-dim { color: var(--text-secondary); }
+.bb-orange { color: var(--orange); }
+.bb-cyan { color: var(--cyan); }
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+.bb-cursor {
+  display: inline-block;
+  width: 7px;
+  height: 11px;
+  background: var(--orange);
+  animation: blink 1s step-end infinite;
+  vertical-align: middle;
+  margin-left: 2px;
+}
+
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--border-bright); }
+
+.bb-row:hover { background: var(--panel-hover); }

@@ -1,0 +1,19 @@
+# Cache data (regenerated from yfinance at startup)
+data/cache/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.env
+
+# Node
+dashboard/node_modules/
+dashboard/dist/
+
+# Logs
+*.log
+nohup.out
+
+# OS
+.DS_Store
