@@ -13,10 +13,10 @@ const TICKER_APPROACH: Record<string, string> = {
   // Deep Value
   BUKA: "DV", DIVA: "DV", INCI: "DV", LPKR: "DV",
   LPLI: "DV", PUDP: "DV", SCCO: "DV", UCID: "DV",
-  KSIX: "DV", DPNS: "DV",
+  KSIX: "DV", DPNS: "DV", IGAR: "DV", RIGS: "DV",
   // Growth Value
-  ASGR: "GV", AUTO: "GV", BAYU: "GV", IGAR: "GV",
-  RIGS: "GV", TAPG: "GV",
+  ASGR: "GV", AUTO: "GV", BAYU: "GV",
+  TAPG: "GV",
   // Dividend Value
   LPIN: "DIV",
 };

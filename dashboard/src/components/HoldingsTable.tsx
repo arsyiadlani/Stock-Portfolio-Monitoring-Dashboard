@@ -33,8 +33,8 @@ const APPROACH_MAP: Record<string, { label: string; color: string }> = {
   ASGR: { label: "GV",  color: "var(--amber)" },
   AUTO: { label: "GV",  color: "var(--amber)" },
   BAYU: { label: "GV",  color: "var(--amber)" },
-  IGAR: { label: "GV",  color: "var(--amber)" },
-  RIGS: { label: "GV",  color: "var(--amber)" },
+  IGAR: { label: "DV",  color: "var(--text-secondary)" },
+  RIGS: { label: "DV",  color: "var(--text-secondary)" },
   TAPG: { label: "GV",  color: "var(--amber)" },
   // Dividend Value
   LPIN: { label: "DIV", color: "var(--green)" },

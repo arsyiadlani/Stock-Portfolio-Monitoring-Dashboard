@@ -8,6 +8,7 @@ DATA_CACHE_IHSG = ROOT / "data" / "cache" / "ihsg"
 DATA_CACHE_DIVIDENDS = ROOT / "data" / "cache" / "dividends"
 
 TRANSACTIONS_CSV = DATA_RAW / "portfolio_transactions.csv"
+SOURCE_CSV = ROOT / "Portfolio Risk Management - Investment Portfolio.csv"
 IHSG_PARQUET = DATA_CACHE_IHSG / "JKSE.parquet"
 
 # First transaction date in the active window (2025+)

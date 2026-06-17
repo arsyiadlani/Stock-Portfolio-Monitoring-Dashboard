@@ -75,11 +75,12 @@ Key parsing differences vs v1:
 
 ## CSV Sync Workflow
 
-Two files must be kept in sync manually:
 - **Source**: `Portfolio Risk Management - Investment Portfolio.csv` (root, user updates this)
 - **Engine reads**: `data/raw/portfolio_transactions.csv`
 
-When user updates source CSV:
+**Automatic:** `POST /api/refresh-prices` (REFRESH button in dashboard) now auto-copies source → engine before re-fetching prices. No manual step needed.
+
+Manual fallback if needed:
 ```bash
 cp "/home/arsyi/workspace/StockPortfoliov2/Portfolio Risk Management - Investment Portfolio.csv" \
    /home/arsyi/workspace/StockPortfoliov2/data/raw/portfolio_transactions.csv
@@ -109,8 +110,8 @@ Rationale: focus on IDX-listed stocks only for accurate IHSG benchmarking.
 | ASGR   | Growth Value | Astra Graphia |
 | AUTO   | Growth Value | Astra Otoparts |
 | BAYU   | Growth Value | Bayu Buana Travel |
-| IGAR   | Growth Value | Champion Pacific |
-| RIGS   | Growth Value | Rig Tenders |
+| IGAR   | Deep Value | Champion Pacific |
+| RIGS   | Deep Value | Rig Tenders |
 | TAPG   | Growth Value | |
 | LPIN   | Dividend Value | Multi Prima Sejahtera |
 

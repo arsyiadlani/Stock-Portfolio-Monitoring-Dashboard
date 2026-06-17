@@ -196,8 +196,10 @@ def transactions():
 @app.post("/api/refresh-prices")
 def refresh_prices():
     global _prices, _ihsg
-    from config import DATA_CACHE_PRICES, IHSG_PARQUET
+    from config import DATA_CACHE_PRICES, IHSG_PARQUET, SOURCE_CSV, TRANSACTIONS_CSV
     import shutil
+    if SOURCE_CSV.exists():
+        shutil.copy2(SOURCE_CSV, TRANSACTIONS_CSV)
     shutil.rmtree(DATA_CACHE_PRICES, ignore_errors=True)
     DATA_CACHE_PRICES.mkdir(parents=True, exist_ok=True)
     if IHSG_PARQUET.exists():
