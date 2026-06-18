@@ -20,7 +20,7 @@ app = FastAPI(title="Portfolio Engine v2")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://localhost:5174", "http://localhost:5175"],
+    allow_origins=["http://localhost:5173", "http://localhost:5174", "http://localhost:5175", "http://localhost:5190", "http://10.12.1.235:5190"],
     allow_methods=["*"],
     allow_headers=["*"],
 )

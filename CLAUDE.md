@@ -30,7 +30,7 @@ StockPortfoliov2/
 │   ├── dividend_fetcher.py             # yfinance dividends fetch + parquet cache (tz-naive)
 │   ├── benchmark.py                    # IHSG normalization + return% series
 │   └── requirements.txt
-└── dashboard/                          # React + Vite frontend (port 5180, may grab 5182)
+└── dashboard/                          # React + Vite frontend (port 5190)
     ├── src/
     │   ├── App.tsx                     # Layout: status bar (EXCL/INCL DIV toggle), header, grid
     │   ├── main.tsx                    # QueryClient (refetchInterval: 5 min)
@@ -157,7 +157,7 @@ nohup /home/arsyi/anaconda3/envs/stock_portfolio/bin/uvicorn main:app --port 800
 # Kill backend
 kill $(lsof -ti:8004)
 
-# Frontend (port 5180, may auto-grab 5182 if 5180-5181 occupied)
+# Frontend (port 5190)
 cd /home/arsyi/workspace/StockPortfoliov2/dashboard
 npm run dev
 

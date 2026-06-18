@@ -46,7 +46,7 @@ StockPortfoliov2/
 │   ├── data_loader.py       # CSV parser
 │   ├── benchmark.py         # IHSG normalization
 │   └── requirements.txt
-├── dashboard/               # React + Vite frontend (port 5180)
+├── dashboard/               # React + Vite frontend (port 5190)
 │   └── src/
 │       ├── App.tsx          # Layout, dividend toggle state
 │       ├── components/
@@ -102,7 +102,7 @@ uvicorn main:app --port 8004 --reload
 cd dashboard
 npm install
 npm run dev
-# → http://localhost:5180
+# → http://localhost:5190
 ```
 
 ### Update transactions
