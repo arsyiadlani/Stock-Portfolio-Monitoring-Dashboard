@@ -12,6 +12,7 @@ Personal IDX equity portfolio tracker benchmarked against IHSG. Bloomberg Termin
 - **IHSG benchmark** — portfolio return vs ^JKSE from T0 (28 Feb 2025)
 - **Dividend tracking** — ex-date events, IDR received per ticker based on shares held
 - **EXCL / INCL DIV toggle** — switch between base and dividend-adjusted P&L, return%, CAGR, and chart line
+- **Risk metrics** — Sharpe Ratio (annualized, RF=BI Rate 5.75%) and Maximum Drawdown, each with IHSG comparison and div-adjusted variant
 - **CAGR metric** — annualized return with dynamic tooltip (period, formula, days/years)
 - **Performance chart** — portfolio vs IHSG return% from T0, with 1W/1M/3M/1Y/MAX range selector
 - **Holdings table** — per-stock lots, avg cost, current price, unrealized P&L
@@ -50,7 +51,7 @@ StockPortfoliov2/
 │   └── src/
 │       ├── App.tsx          # Layout, dividend toggle state
 │       ├── components/
-│       │   ├── SummaryCards.tsx      # 9–10 metric cards
+│       │   ├── SummaryCards.tsx      # 11–12 metric cards (incl. Sharpe, MaxDD)
 │       │   ├── PerformanceChart.tsx  # Portfolio vs IHSG chart
 │       │   ├── HoldingsTable.tsx
 │       │   ├── ContributionChart.tsx
@@ -71,7 +72,7 @@ StockPortfoliov2/
 
 | Method | Path | Description |
 |--------|------|-------------|
-| GET | `/api/summary` | Portfolio summary: P&L, return%, CAGR, dividend total |
+| GET | `/api/summary` | Portfolio summary: P&L, return%, CAGR, Sharpe Ratio, Max Drawdown, IHSG benchmarks, dividend total |
 | GET | `/api/performance` | Daily return% series (base + dividend-adjusted) |
 | GET | `/api/holdings` | Per-stock snapshot |
 | GET | `/api/transactions` | Full transaction history |
@@ -113,7 +114,7 @@ When the source CSV changes:
 cp "Portfolio Risk Management - Investment Portfolio.csv" data/raw/portfolio_transactions.csv
 ```
 
-Then hit **REFRESH** in the dashboard or `POST /api/refresh-prices`.
+Or simply hit **REFRESH** in the dashboard — it auto-copies the source CSV before re-fetching prices.
 
 ---
 
@@ -136,6 +137,9 @@ Stocks classified into three approaches:
 - **`auto_adjust=False`** in yfinance — prevents split/dividend price adjustment
 - **tz-naive dividends** — yfinance returns Asia/Jakarta tz-aware index; stripped with `.tz_localize(None)` before save/compare
 - **T0 = 2025-02-28** — first transaction date in active portfolio window
+- **Sharpe RF = BI Rate 5.75% p.a.** — Indonesian risk-free benchmark; div-adjusted variant adds cumulative dividends to daily portfolio value
+- **Max Drawdown = close price only** — peak-to-trough from T0; intraday drawdown not captured
+- **IHSG risk metrics** — Sharpe and MaxDD computed for same period as portfolio for direct comparison
 
 ---
 
