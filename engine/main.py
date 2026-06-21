@@ -67,14 +67,61 @@ def shutdown():
 
 @app.get("/api/summary")
 def summary():
+    import math
     transactions = load_transactions()
     timeline = build_holdings_timeline(transactions)
     daily = build_daily_value_series(_prices)
     result = compute_summary(daily, _ihsg)
     last_priced = next((e.date.isoformat() for e in reversed(daily) if e.market_value > 0), None)
     result["data_as_of"] = last_priced
-    _, dividend_total = compute_dividends(_dividends, timeline)
+    div_events, dividend_total = compute_dividends(_dividends, timeline)
     result["dividend_total"] = dividend_total
+
+    # Build cumulative dividends by date for div-adjusted risk metrics
+    cumulative_div: dict[str, float] = {}
+    running = 0.0
+    for ev in div_events:
+        running += ev["total_received"]
+        cumulative_div[ev["date"]] = running
+
+    # Div-adjusted daily portfolio values
+    last_div = 0.0
+    port_values_div = []
+    for e in daily:
+        if e.total_buy <= 0:
+            continue
+        d = e.date.isoformat()
+        if d in cumulative_div:
+            last_div = cumulative_div[d]
+        port_values_div.append(e.market_value + (e.total_buy - e.total_invested) + last_div)
+
+    # Sharpe (div-adjusted)
+    sharpe_div = 0.0
+    if len(port_values_div) >= 2:
+        rets = [(port_values_div[i] - port_values_div[i-1]) / port_values_div[i-1]
+                for i in range(1, len(port_values_div)) if port_values_div[i-1] > 0]
+        rf_daily = 0.0575 / 252
+        excess = [r - rf_daily for r in rets]
+        if len(excess) > 1:
+            mean_ex = sum(excess) / len(excess)
+            variance = sum((r - mean_ex) ** 2 for r in excess) / (len(excess) - 1)
+            std_ex = math.sqrt(variance)
+            sharpe_div = round(mean_ex / std_ex * math.sqrt(252), 2) if std_ex > 0 else 0.0
+
+    # Max Drawdown (div-adjusted)
+    maxdd_div = 0.0
+    if port_values_div:
+        peak = port_values_div[0]
+        for v in port_values_div:
+            if v > peak:
+                peak = v
+            dd = (v - peak) / peak if peak > 0 else 0.0
+            if dd < maxdd_div:
+                maxdd_div = dd
+        maxdd_div = round(maxdd_div * 100, 2)
+
+    result["sharpe_ratio_div"] = sharpe_div
+    result["max_drawdown_pct_div"] = maxdd_div
     return result
 
 

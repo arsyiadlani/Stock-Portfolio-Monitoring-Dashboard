@@ -10,6 +10,12 @@ export interface Summary {
   portfolio_cagr: number;
   ihsg_cagr: number;
   dividend_total: number;
+  sharpe_ratio: number;
+  sharpe_ratio_div: number;
+  max_drawdown_pct: number;
+  max_drawdown_pct_div: number;
+  ihsg_sharpe: number;
+  ihsg_max_drawdown_pct: number;
   data_as_of: string | null;
 }
 

@@ -122,7 +122,7 @@ ASII, INDF, UNTR, CPIN, SMGR, ADRO, LSIP, ACES, RALS, PTBA, SIDO, TLKM, AKRA, CM
 
 | Method | Path | Returns |
 |--------|------|---------|
-| GET | `/api/summary` | total_invested, current_value, unrealized_pnl, realized_pnl, total_return_pct, ihsg_return_pct, alpha, **portfolio_cagr, ihsg_cagr, dividend_total**, data_as_of |
+| GET | `/api/summary` | total_invested, current_value, unrealized_pnl, realized_pnl, total_return_pct, ihsg_return_pct, alpha, **portfolio_cagr, ihsg_cagr, dividend_total**, **sharpe_ratio, sharpe_ratio_div, max_drawdown_pct, max_drawdown_pct_div, ihsg_sharpe, ihsg_max_drawdown_pct**, data_as_of |
 | GET | `/api/performance` | Daily: date, portfolio_value, total_invested, portfolio_return_pct, **portfolio_return_pct_div**, ihsg_return_pct |
 | GET | `/api/holdings` | Per-stock: ticker, lots, avg_cost, current_price, market_value, unrealized_pnl, pnl_pct |
 | GET | `/api/transactions` | All filtered IDX transactions |
@@ -141,8 +141,10 @@ ASII, INDF, UNTR, CPIN, SMGR, ADRO, LSIP, ACES, RALS, PTBA, SIDO, TLKM, AKRA, CM
 
 Pill toggle in top status bar. State in `App.tsx`, passed as prop to `SummaryCards` and `PerformanceChart`.
 
-**EXCL DIV (default):** 9 summary cards, base return/CAGR/alpha, chart shows base portfolio line.
-**INCL DIV:** 10 summary cards (DIVIDENDS card appears), "REALIZED + DIV" label, all metrics adjusted, chart shows div-adjusted line labeled "PORTFOLIO + DIV".
+**EXCL DIV (default):** 11 summary cards, base return/CAGR/alpha/Sharpe/MaxDD, chart shows base portfolio line.
+**INCL DIV:** 12 summary cards (DIVIDENDS card appears), "REALIZED + DIV" label, all metrics adjusted (incl Sharpe/MaxDD div variants), chart shows div-adjusted line labeled "PORTFOLIO + DIV".
+
+Card order: TOTAL INVESTED → MARKET VALUE → UNREALIZED P&L → REALIZED P&L → TOTAL P&L → [DIVIDENDS] → SHARPE RATIO → MAX DRAWDOWN → PORTFOLIO RTN → IHSG RTN → ALPHA → CAGR
 
 Dividend data: fetched from yfinance at startup + daily auto-refresh. Cached per-ticker in parquet.
 Important: yfinance dividend index is tz-aware (Asia/Jakarta) — must `.tz_localize(None)` before saving/comparing.
@@ -176,7 +178,9 @@ tail -f /tmp/portfolio_v2_backend.log
 - **CAGR**: computed in backend (`compute_summary`), frontend also recomputes locally for div-adjusted variant
 - **tz-naive dividends**: yfinance returns tz-aware (Asia/Jakarta); must strip with `.tz_localize(None)` before parquet save and comparison
 - **PerformanceChart**: both `portfolio_return_pct` and `portfolio_return_pct_div` in API response; frontend switches dataKey based on toggle
-- **SummaryCards grid**: 9 cols (EXCL DIV) or 10 cols (INCL DIV), DIVIDENDS card conditionally rendered
+- **SummaryCards grid**: 11 cols (EXCL DIV) or 12 cols (INCL DIV), DIVIDENDS card conditionally rendered
+- **Sharpe Ratio**: annualized, RF = BI Rate 5.75% p.a., computed in `portfolio_engine.py`. Div-adjusted variant (`sharpe_ratio_div`) computed in `main.py` summary endpoint using cumulative dividend series
+- **Max Drawdown**: peak-to-trough dari T0, close price harian only (bukan intraday). Div-adjusted variant (`max_drawdown_pct_div`) juga di summary endpoint. IHSG variants (`ihsg_sharpe`, `ihsg_max_drawdown_pct`) periode sama
 - **AllocationPanel**: "Unclassified" group for legacy tickers without approach label
 - **Same Bloomberg Terminal UI** as v1: black bg, IBM Plex Mono, orange accent
 

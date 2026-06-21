@@ -1,65 +1,47 @@
 # Progress — Stock Portfolio Dashboard v2
 
-## Status: READY TO RUN (npm install needed)
+## Status: LIVE ✅ (backend :8004, frontend :5190)
 
 ---
 
 ## Phase 1: Project Setup ✅
-
-- [x] Analyzed source CSV (`Portfolio Risk Management - Investment Portfolio.csv`)
-- [x] Identified 32 IDX stocks, excluded foreign/gold/bonds/ETF/e-IPO
-- [x] Created directory structure (`engine/`, `dashboard/`, `data/raw/`, `data/cache/`)
-- [x] Copied CSV to `data/raw/portfolio_transactions.csv`
-
----
+- [x] Source CSV analyzed, 20 active IDX stocks identified
+- [x] Directory structure created
+- [x] CSV synced to `data/raw/portfolio_transactions.csv`
 
 ## Phase 2: Backend Engine ✅
-
-- [x] `config.py` — 32 TICKER_MAP entries, T0=2023-01-13, port 8003 reference
-- [x] `data_loader.py` — CSV parser with:
-  - Filter: `Sector=="Stock"` only
-  - Filter: `EXCLUDED_INSTRUMENTS` set (14 excluded)
-  - Price cleaning: removes `Rp`, commas (e.g. `"5,375"` → `5375`)
-  - Date parsing: `"13 Jan 2023"` format via `pd.to_datetime(dayfirst=True)`
-- [x] `portfolio_engine.py` — Holdings timeline, daily valuation, cumulative P/L
-- [x] `price_fetcher.py` — Yahoo Finance + parquet cache (incremental fetch)
+- [x] `config.py` — 20 TICKER_MAP, T0=2025-02-28, port 8004, SOURCE_CSV for auto-sync
+- [x] `data_loader.py` — CSV parser (Sector=="Stock" filter, exclusion list, Rp price cleaning)
+- [x] `portfolio_engine.py` — Holdings timeline, daily valuation, P/L, CAGR, Sharpe, MaxDD
+- [x] `price_fetcher.py` — Yahoo Finance + parquet cache (`auto_adjust=False`)
+- [x] `dividend_fetcher.py` — yfinance dividends, tz-naive parquet cache
 - [x] `benchmark.py` — IHSG normalization to T0
-- [x] `main.py` — FastAPI app on port 8003, APScheduler 15:35 WIB
-- [x] `requirements.txt`
-
----
+- [x] `main.py` — FastAPI port 8004, APScheduler 15:35 WIB, REFRESH auto-syncs CSV
 
 ## Phase 3: Frontend Dashboard ✅
+- [x] `vite.config.ts` — port 5190, `host: true` (network accessible), proxy → 8004
+- [x] `App.tsx` — EXCL/INCL DIV toggle, layout grid
+- [x] `SummaryCards.tsx` — 11 cards (EXCL DIV) / 12 cards (INCL DIV):
+  - TOTAL INVESTED, MARKET VALUE, UNREALIZED P&L, REALIZED P&L, TOTAL P&L
+  - SHARPE RATIO, MAX DRAWDOWN (dengan IHSG comparison + div-adjusted variant)
+  - PORTFOLIO RTN, IHSG RTN, ALPHA, CAGR
+  - [INCL DIV] DIVIDENDS card tambahan
+- [x] `PerformanceChart.tsx` — Portfolio vs IHSG, 1W/1M/3M/1Y/MAX, div-adjusted line
+- [x] `HoldingsTable.tsx` — Sortable, TickerModal, approach map (DV/GV/DIV)
+- [x] `AllocationPanel.tsx` — DV/GV/DIV groups + Unclassified, stacked bar
+- [x] `ContributionChart.tsx`, `PortfolioStats.tsx`, `TransactionLog.tsx`
 
-- [x] Config: `package.json`, `vite.config.ts` (proxy → 8003), `tsconfig.json`, `tailwind.config.js`, `postcss.config.js`, `index.html`
-- [x] Core: `main.tsx`, `index.css` (added `--surface` var), `App.tsx` (updated header: T0=13 JAN 2023, 32 instruments)
-- [x] Lib: `api.ts`, `types.ts`
-- [x] Components:
-  - [x] `SummaryCards.tsx` — 8 metrics with Indonesian tooltips
-  - [x] `PerformanceChart.tsx` — Added 1Y range button (vs v1 which had 1W/1M/3M/MAX)
-  - [x] `HoldingsTable.tsx` — Updated `APPROACH_MAP` for 32 v2 tickers
-  - [x] `AllocationPanel.tsx` — Updated `TICKER_APPROACH`, added "Unclassified" group for legacy tickers
-  - [x] `ContributionChart.tsx` — Identical to v1
-  - [x] `PortfolioStats.tsx` — Identical to v1
-  - [x] `TransactionLog.tsx` — Identical to v1
+## Phase 4: Classification ✅
+- [x] RIGS → Deep Value (sebelumnya Growth Value)
+- [x] IGAR → Deep Value (sebelumnya Growth Value)
+- [x] Updated: AllocationPanel.tsx, HoldingsTable.tsx, CLAUDE.md, source CSV
 
----
-
-## Phase 4: Dependencies ⏳
-
-- [ ] `npm install` in `dashboard/` (run once)
-
----
-
-## TODO / Next Steps
-
-- [ ] Run `npm install` and start both backend + frontend
-- [ ] Verify CSV parsing: check `data_loader.py` loads correctly with no errors
-- [ ] First REFRESH: click button to fetch prices for all 32 tickers from Yahoo Finance
-  - Note: initial fetch may take 2–3 min (32 tickers × 3 years of history)
-- [ ] Validate performance chart looks correct from Jan 2023
-- [ ] Update `data/raw/portfolio_transactions.csv` when source CSV changes
-- [ ] Consider renaming "PERSONAL PORTFOLIO" in `App.tsx` header to actual name
+## Phase 5: Risk Metrics ✅ (2026-06-21)
+- [x] Sharpe Ratio — annualized, RF=BI Rate 5.75%, IHSG comparison sub-label
+- [x] Max Drawdown — peak-to-trough dari T0, IHSG comparison sub-label
+- [x] Div-adjusted variants (`sharpe_ratio_div`, `max_drawdown_pct_div`) — aktif saat INCL DIV toggle
+- [x] Cards diposisikan antara TOTAL P&L dan PORTFOLIO RTN
+- [x] Tooltip menjelaskan makna metrik sebelum formula
 
 ---
 
@@ -67,20 +49,22 @@
 
 | Date | Decision | Reason |
 |------|----------|--------|
-| 2026-06-12 | T0 = 2023-01-13 | First IDX stock transaction (ASII BUY) |
-| 2026-06-12 | Port 8003 | Avoids conflict with v1 (8002) and other projects |
-| 2026-06-12 | Filter Sector=="Stock" | Cleaner than instrument-name-only filter |
-| 2026-06-12 | EXCLUDED_INSTRUMENTS set | Foreign stocks, gold, bonds excluded from IHSG comparison |
-| 2026-06-12 | Added 1Y range in PerformanceChart | 3+ years of data benefits from 1Y view |
-| 2026-06-12 | AllocationPanel Unclassified group | Legacy tickers (pre-approach era) still may appear in holdings |
-| 2026-06-12 | Weighted avg cost (not FIFO) | Consistent with DCA strategy, matches broker reporting |
+| 2026-06-12 | T0 = 2025-02-28 | First transaction dalam active portfolio window |
+| 2026-06-12 | Port 8004 | Avoids conflict with v1 (8002) dan projects lain |
+| 2026-06-12 | Filter Sector=="Stock" | Focus IDX stocks untuk IHSG benchmarking akurat |
+| 2026-06-12 | Weighted avg cost (not FIFO) | Konsisten dengan DCA strategy |
+| 2026-06-12 | auto_adjust=False yfinance | Harga historis akurat tanpa split/div adjustment |
+| 2026-06-12 | Gross BUY denominator | Prevent return spike saat SELL besar |
+| 2026-06-15 | REFRESH auto-sync CSV | User tidak perlu manual cp setiap update transaksi |
+| 2026-06-21 | Port 5190 + host:true | Port 5180-5182 dipakai proses lain; network accessible |
+| 2026-06-21 | Sharpe RF = 5.75% | BI Rate sebagai risk-free benchmark IDR |
+| 2026-06-21 | MaxDD dari portfolio value harian | Close price only, tidak intraday |
+| 2026-06-21 | Div-adjusted Sharpe/MaxDD | Konsistensi dengan INCL DIV toggle di metrik lain |
 
 ---
 
 ## Known Issues / Watchlist
 
-- Initial price fetch is slow (32 tickers × ~3 years = ~96 ticker-year fetches)
-- Some tickers (KSIX, TAPG, DPNS) started trading 2025 — Yahoo Finance may have limited history
-- LSIP: partially sold multiple times (May–Jun 2025), fully sold by Jun 2025
-- DPNS: bought Aug 2025, fully sold Aug 2025 (same month)
-- Performance chart may show flat line Jan–Dec 2023 if prices unavailable for some tickers
+- DPNS.JK: sering muncul warning "possibly delisted" dari yfinance — tidak fatal
+- Sharpe inflated pada periode bull market pendek (16 bulan) — wajar, bukan bug
+- MaxDD hanya close price harian, bukan intraday — actual drawdown bisa lebih dalam

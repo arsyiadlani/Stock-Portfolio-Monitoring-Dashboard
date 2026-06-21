@@ -149,7 +149,7 @@ export function SummaryCards({ includeDividends }: SummaryCardsProps) {
   const divInfo = `Total dividen tunai yang diterima dari ex-dividend date selama periode portofolio.\n\nDihitung: shares dipegang saat ex-date × dividen per saham.\n\n${includeDividends ? "[INCL DIV aktif] Dividen sudah dimasukkan ke P&L dan return calculation." : "Toggle ke INCL DIV untuk memasukkan dividen ke perhitungan return."}`;
 
   return (
-    <div className="grid gap-2" style={{ gridTemplateColumns: `repeat(${includeDividends ? 10 : 9}, 1fr)` }}>
+    <div className="grid gap-2" style={{ gridTemplateColumns: `repeat(${includeDividends ? 12 : 11}, 1fr)` }}>
       <Metric
         label="TOTAL INVESTED"
         value={fmtIDR(data.total_invested)}
@@ -196,6 +196,21 @@ export function SummaryCards({ includeDividends }: SummaryCardsProps) {
           info={divInfo}
         />
       )}
+      <Metric
+        label="SHARPE RATIO"
+        value={(includeDividends ? (data.sharpe_ratio_div ?? 0) : (data.sharpe_ratio ?? 0)).toFixed(2)}
+        sub={`IHSG ${(data.ihsg_sharpe ?? 0).toFixed(2)}`}
+        tone={(includeDividends ? (data.sharpe_ratio_div ?? 0) : (data.sharpe_ratio ?? 0)) >= 1 ? "cyan" : (includeDividends ? (data.sharpe_ratio_div ?? 0) : (data.sharpe_ratio ?? 0)) >= 0 ? "amber" : "neg"}
+        leftBorder
+        info={"Mengukur seberapa besar return yang dihasilkan per unit risiko yang diambil. Semakin tinggi, semakin efisien portofolio menghasilkan return relatif terhadap volatilitasnya.\n\nFormula: (return harian − risk-free harian) / std-dev harian × √252.\n\nRisk-free rate: BI Rate 5.75% p.a.\nSub-label = Sharpe IHSG periode sama.\n" + (includeDividends ? "[INCL DIV] Dihitung dengan dividen kumulatif masuk ke nilai portofolio harian.\n" : "") + "\n>1.0 = baik | 0–1.0 = cukup | <0 = return di bawah risk-free rate."}
+      />
+      <Metric
+        label="MAX DRAWDOWN"
+        value={`${(includeDividends ? (data.max_drawdown_pct_div ?? 0) : (data.max_drawdown_pct ?? 0)).toFixed(2)}%`}
+        sub={`IHSG ${(data.ihsg_max_drawdown_pct ?? 0).toFixed(2)}%`}
+        tone={(includeDividends ? (data.max_drawdown_pct_div ?? 0) : (data.max_drawdown_pct ?? 0)) < -20 ? "neg" : (includeDividends ? (data.max_drawdown_pct_div ?? 0) : (data.max_drawdown_pct ?? 0)) < -10 ? "amber" : "neu"}
+        info={"Mengukur seberapa dalam portofolio pernah turun dari puncaknya — indikator risiko kerugian terburuk yang pernah dialami. Semakin kecil (mendekati 0%), semakin terjaga modal dari drawdown besar.\n\nPenurunan terbesar dari puncak ke lembah sejak T0 (28 Feb 2025).\n\nDihitung dari nilai portofolio harian (market value + kas dari SELL).\nSub-label = Max Drawdown IHSG periode sama.\n" + (includeDividends ? "[INCL DIV] Dihitung dengan dividen kumulatif masuk ke nilai portofolio harian.\n" : "") + "\n>−10%: rendah | −10% s/d −20%: moderat | <−20%: tinggi."}
+      />
       <Metric
         label="PORTFOLIO RTN"
         value={fmtPct(adjTotalReturnPct)}

@@ -1,3 +1,4 @@
+import math
 from dataclasses import dataclass, field
 from datetime import date, timedelta
 from typing import Optional
@@ -222,6 +223,62 @@ def compute_summary(
     portfolio_cagr = (((1 + total_return_pct / 100) ** (1 / years)) - 1) * 100 if years > 0 and total_buy > 0 else 0.0
     ihsg_cagr = (((1 + ihsg_return_pct / 100) ** (1 / years)) - 1) * 100 if years > 0 else 0.0
 
+    # Daily portfolio values (market_value + cash from sells)
+    port_values = [e.market_value + (e.total_buy - e.total_invested) for e in daily_series if e.total_buy > 0]
+
+    # Sharpe Ratio (annualized, BI Rate 5.75% as risk-free)
+    sharpe_ratio = 0.0
+    if len(port_values) >= 2:
+        daily_rets = [(port_values[i] - port_values[i-1]) / port_values[i-1]
+                      for i in range(1, len(port_values)) if port_values[i-1] > 0]
+        rf_daily = 0.0575 / 252
+        excess = [r - rf_daily for r in daily_rets]
+        if len(excess) > 1:
+            mean_ex = sum(excess) / len(excess)
+            variance = sum((r - mean_ex) ** 2 for r in excess) / (len(excess) - 1)
+            std_ex = math.sqrt(variance)
+            sharpe_ratio = round(mean_ex / std_ex * math.sqrt(252), 2) if std_ex > 0 else 0.0
+
+    # Maximum Drawdown (peak-to-trough from T0)
+    max_drawdown_pct = 0.0
+    if port_values:
+        running_max = port_values[0]
+        for v in port_values:
+            if v > running_max:
+                running_max = v
+            dd = (v - running_max) / running_max if running_max > 0 else 0.0
+            if dd < max_drawdown_pct:
+                max_drawdown_pct = dd
+        max_drawdown_pct = round(max_drawdown_pct * 100, 2)
+
+    # IHSG Sharpe + Max Drawdown (same period as portfolio)
+    ihsg_sharpe = 0.0
+    ihsg_max_drawdown_pct = 0.0
+    ihsg_period = ihsg_df[
+        (ihsg_df.index >= pd.Timestamp(first.date)) &
+        (ihsg_df.index <= pd.Timestamp(latest.date))
+    ]
+    if not ihsg_period.empty:
+        ihsg_vals = ihsg_period["close"].tolist()
+        if len(ihsg_vals) >= 2:
+            ihsg_rets = [(ihsg_vals[i] - ihsg_vals[i-1]) / ihsg_vals[i-1]
+                         for i in range(1, len(ihsg_vals)) if ihsg_vals[i-1] > 0]
+            rf_daily = 0.0575 / 252
+            ihsg_excess = [r - rf_daily for r in ihsg_rets]
+            if len(ihsg_excess) > 1:
+                mean_ex = sum(ihsg_excess) / len(ihsg_excess)
+                variance = sum((r - mean_ex) ** 2 for r in ihsg_excess) / (len(ihsg_excess) - 1)
+                std_ex = math.sqrt(variance)
+                ihsg_sharpe = round(mean_ex / std_ex * math.sqrt(252), 2) if std_ex > 0 else 0.0
+            running_max = ihsg_vals[0]
+            for v in ihsg_vals:
+                if v > running_max:
+                    running_max = v
+                dd = (v - running_max) / running_max if running_max > 0 else 0.0
+                if dd < ihsg_max_drawdown_pct:
+                    ihsg_max_drawdown_pct = dd
+            ihsg_max_drawdown_pct = round(ihsg_max_drawdown_pct * 100, 2)
+
     return {
         "total_invested": latest.total_invested,
         "total_buy": total_buy,
@@ -233,4 +290,8 @@ def compute_summary(
         "alpha": round(total_return_pct - ihsg_return_pct, 2),
         "portfolio_cagr": round(portfolio_cagr, 2),
         "ihsg_cagr": round(ihsg_cagr, 2),
+        "sharpe_ratio": sharpe_ratio,
+        "max_drawdown_pct": max_drawdown_pct,
+        "ihsg_sharpe": ihsg_sharpe,
+        "ihsg_max_drawdown_pct": ihsg_max_drawdown_pct,
     }
